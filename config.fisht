@@ -1,0 +1,9 @@
+# Add Anaconda Python to PATH
+set -gx PATH /opt/anaconda3/bin $PATH
+
+# Add Node.js to PATH
+set -gx PATH /usr/local/bin $PATH
+
+# (optional) Add Homebrew to PATH if not already
+set -gx PATH /opt/homebrew/bin $PATH
+
