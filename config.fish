@@ -79,6 +79,9 @@ abbr -a -- dc 'docker compose'
 abbr -a -- dps 'docker ps'
 abbr -a -- di 'docker images'
 
+# Lazygit shortcut
+abbr -a -- lg 'lazygit'
+
 # Kubernetes shortcuts
 abbr -a -- k 'kubectl'
 abbr -a -- kgp 'kubectl get pods'
@@ -90,9 +93,69 @@ abbr -a -- kl 'kubectl logs'
 abbr -a -- reload 'exec fish'
 abbr -a -- src 'source ~/.config/fish/config.fish'
 
+# Modern replacements for classic tools
+abbr -a -- top 'btop'           # Beautiful system monitor
+abbr -a -- ps 'procs'           # Modern process viewer
+abbr -a -- du 'dust'            # Disk usage analyzer
+abbr -a -- grep 'rg'            # Ripgrep - faster grep
+abbr -a -- sed 'sd'             # Modern sed replacement
+abbr -a -- http 'http'          # HTTPie for API testing
+abbr -a -- loc 'tokei'          # Count lines of code
+
+# File operations with style
+abbr -a -- preview 'glow'       # Markdown previewer
+abbr -a -- json 'jq .'          # Pretty print JSON
+abbr -a -- yaml 'yq .'          # Pretty print YAML
+
+# System info
+abbr -a -- sysinfo 'neofetch'   # System information
+abbr -a -- weather 'curl wttr.in'
+
 # ============================================================================
-# Custom Functions (keeping your complex workflows)
+# Demo Functions (for showing off your setup)
 # ============================================================================
+
+function demo --description "Show off your CLI setup"
+    clear
+    echo (set_color --bold cyan)"🚀 CLI DEMO MODE ACTIVATED 🚀"
+    echo
+    
+    echo (set_color --bold yellow)"→ System Information:"
+    neofetch --config none --ascii_distro macos_small
+    
+    echo (set_color --bold yellow)"→ Current Directory Structure:"
+    eza --tree --level=2 --icons
+    
+    echo (set_color --bold yellow)"→ Git Status (if in repo):"
+    if git rev-parse --git-dir >/dev/null 2>&1
+        git status --short
+        echo (set_color green)"✓ Git repository detected"
+    else
+        echo (set_color red)"✗ Not in a git repository"
+    end
+    
+    echo (set_color --bold yellow)"→ System Resources:"
+    btop --snapshot
+end
+
+function matrix --description "Matrix effect for terminal"
+    echo (set_color green)
+    for i in (seq 1 50)
+        printf "%s" (random choice "0" "1" " " "█" "▓" "▒" "░")
+        if test (math $i % 80) -eq 0
+            echo
+        end
+        sleep 0.01
+    end
+    echo (set_color normal)
+end
+
+function weather --description "Get weather with style"
+    echo (set_color --bold cyan)"🌤️  Weather Report:"
+    curl -s "wttr.in?format=3"
+    echo
+    curl -s "wttr.in?0&q&format=%l:+%c+%t+%h+%w"
+end
 
 function deskopen --description "Open desktop in Finder"
     open ~/Desktop
@@ -106,6 +169,12 @@ end
 function logs --description "shows railway logs of curent project"
     railway logs
 end
+
+
+function countLines -a pattern --description "Count lines of code in current directory"
+    find . -name "*$pattern" -print0 | xargs -0 cat | wc -l
+end
+
 
 
 
@@ -143,14 +212,28 @@ function cursorPath --description "Add Cursor to PATH"
 end
 
 # ============================================================================
-# Git Branch in Prompt
+# Custom Fish Prompt
 # ============================================================================
 function fish_prompt
-    set -l git_branch (git branch 2>/dev/null | sed -n '/\* /s///p')
-    if test -n "$git_branch"
-        echo -n (set_color cyan)(prompt_pwd)(set_color yellow)" ($git_branch)"(set_color normal)" > "
+    set -l last_status $status
+    
+    # Current directory (shortened)
+    set -l pwd_info (prompt_pwd)
+    echo -n (set_color cyan)$pwd_info(set_color normal)
+    
+    # Git branch if in repo
+    if git rev-parse --git-dir >/dev/null 2>&1
+        set -l branch (git branch --show-current 2>/dev/null)
+        if test -n "$branch"
+            echo -n (set_color yellow)" ($branch)"(set_color normal)
+        end
+    end
+    
+    # Prompt symbol
+    if test $last_status -eq 0
+        echo -n (set_color green)" ➜ "(set_color normal)
     else
-        echo -n (set_color cyan)(prompt_pwd)(set_color normal)" > "
+        echo -n (set_color red)" ➜ "(set_color normal)
     end
 end
 
