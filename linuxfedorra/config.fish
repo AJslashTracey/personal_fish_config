@@ -20,4 +20,4 @@ end
 function 10s-log
     journalctl -u app-datacreation-10s -f
 end
-abbr -a -- ls ls -a
+abbr -a -- ls 'eza --icons --group-directories-first' -a
